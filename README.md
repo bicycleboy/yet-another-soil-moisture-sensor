@@ -6,6 +6,8 @@
 
 A project to learn something about electronics/esp32/home automation while keeping your plants and/or garden watered.  It probably suits a hobbyist, or a high school projet, someone who already has [Home Assistant](https://www.home-assistant.io/) and has heard about, and is curious about esp32's. It may not be the ideal "first" esp32 project but with the onboard led you have all the kit you need to search for and follow a beginners blink test esphome tutorial.  
 
+<img src="images/finished-product.jpg" alt="Finished product picture" width="300"/><img src="images/dashboard.jpg" alt="Finished product picture" width="300"/>
+
 ## Features
 
 - It actually works, it will tell you if your soil is dry!
@@ -21,19 +23,20 @@ A project to learn something about electronics/esp32/home automation while keepi
 - [Headers for the esp32 and to connect the sensor to the board ](https://core-electronics.com.au/connectors-sockets/headers.html)
 - [2-pin JST PH Connector cable](https://core-electronics.com.au/jst-2-pin-cable.html)
 - [N-Channel MOSFET such as 2N7000](https://core-electronics.com.au/n-channel-mosfet-2n7000.html)
-- 2 x 100Ω Resistors, 1x 10kΩ resistor,
+- 2 x 100Ω Resistors, 1x 10kΩ resistor
 - 26AWG wires (e.g. red, black, yellow)
 - External antenna, such as [this](https://core-electronics.com.au/915mhz-ufl-antenna.html), if your esp32 supports an external antenna. (See notes.)
 - [small protoboard](https://core-electronics.com.au/prototyping.html#category_60)
 - Enclosure of [one type](https://en.wikipedia.org/wiki/Mason_jar#/media/File:Mason_jar_array.jpg) or [another](https://www.jaycar.com.au/search?q=enclosure)
 - USB C cable for charging
 - Optionally a breadboard and leads if you don't have them already for prototyping
+- Optionally a mix pack of JST connectors for prototyping and in case your wires come with the "wrong" connectors, you can also get pre crimped wires
 
 *Notes on hardware* 
 
 In 2025 this project might cost you AU$60 or more if you don't already have some bits.  While the heart, the esp32, might only cost you AU$9 and the sensor AU$3 the rest adds up and a waterproof polycarbonate enclosure can be AU$30 making a jam jar look attractive.  Many of the above can be bought cheaply in packs for multiple projects.  I have included links to one supplier I use for my convenience documenting the project (in case I forget what I did and why :-) .  There are many cheap and expensive commerical soil sensors out there but I did not find one that integrates with home assistant.  
 
-You can use many of the various esp32 boards, I chose the esp32-c6 only because it has both an onboard antenna and an interface for connecting an external UFL antenna. If you want to put the sensor in the garden where the WiFi might be weak then an external antenna will help.  This board can also handle 4.2v from the LiPo battery without the need to step the voltage down to 3.3v which some require. If you have or buy a different board, the pinouts will likely be different to the diagram below. 
+You can use many of the various esp32 boards, I chose the esp32-c6 only because it has both an onboard antenna and an interface for connecting an external UFL antenna. If you want to put the sensor in the garden where the WiFi might be weak then an external antenna will help.  This board can also handle 4.2v from the LiPo battery without the need to step the voltage down to 3.3v which some require. If you have or buy a different board, the pinouts will likely be different to the diagram below. Avoid a board/chip that is bleeding edge, check [here](https://esphome.io/components/esp32) for a list of supported types. 
 
 You can replace the sensor with any sensor that can interface with the [ADC](https://en.wikipedia.org/wiki/Analog-to-digital_converter) [GPIO](https://en.wikipedia.org/wiki/General-purpose_input/output)'s on the esp32.  Note that you need to understand that esp32 GPIOs operates at 3.3v which this soil moisture sensor is fine with, other sensors might require 5v or 12v. Other sensors/suppliers might use different connectors so check what you need to attach to the board. 
 
@@ -94,15 +97,35 @@ To do.
 
 Having purchased the hardware, I suggest the following steps:
 1. Perform a blink test with the naked esp32 and esphome as described under Software - esphome.
-2. Prototype your hardware solution using a breadboard and the wiring diagram above. Before powering on with either the USB or battery, check and re-check all connections intended and otherwise against the schematic.  Run your intial tests with the USB attached.  The esp32 red led should blink to indicate the battery is charging.
-3. Get your device visible in esphome as described under Software - esphome.  You should have a User led control, a soil moisture sensor and diagnostic battery, voltage and WiFi signal.  
+2. Prototype your hardware solution using a breadboard and the wiring diagram above. Before powering on with either the USB or battery, check and re-check all connections intended and otherwise against the schematic.  You might need some female JST connectors to join the male JST connectors from the battery and the esp32 to the breadboard. Run your initial tests with the USB attached.  The esp32 red led should blink to indicate the battery is charging.
+3. Get your device visible in esphome as described under Software - esphome.  You should have a User Led control, a soil moisture sensor and diagnostic battery, voltage and WiFi signal.  
 4. Run a wet finger over the surface of the soil moisture sensor.  Shortly it should show as a percentage in home assistant.  If you are getting 0% or 100% see Troubleshooting.
 5. Test the voltage across VCC and GND on the sensor, it should be ~3.7v.
-6. 
-
-Before powering on, check and re-check all connections intended and otherwise against the schematic and your bread board prototype. 
+6. In home assistant navigate to Developer Tools - Actions. Search for "esp" to find the service with a name like esphome.esp32-c6-enter_deep_sleep.  Set a duration of ten seconds (enter 10,000 miliseconds).  Test the voltage across VCC and GND on the sensor, after a few seconds it should drop to zero or near zero.  If so sucess, everything is working!
+7. Now repeat the process for real by soldering the components to the protoboard. I recommend soldering a header to the protoboard so that you can easily remove the esp32 when you are soldering (ie you dont want to overheat the esp32 with clumsy soldering and you might want the esp32 for something else later).  Be careful when soldering the battery terminals, tin the wires first and dont take too long!  The resistors and mosfet are pretty robust against the heat from soldering.  You can probably fit everything on a very small protoboard but for your first go I recommend laying it out so that you can see what you have done with all the connecting wires on the surface and only adjacent holes connected on the underside.
+8. Before powering on, check and re-check all connections intended and otherwise against the schematic and your working breadboard prototype, a maginifying glasss helps check for "cold joints" and the wrong holes being connected.
+9. Plug in the battery and test as steps 4-6.
+10. In the unlikley event that all worked perfectly, you are now ready to create an automation in home assistant such that the sensor is on for 5 minutes a day and alspp the rest of the time.  See Software - Home Assitant YAML above.    
 
 ## Troubleshooting
+
+### Hardware
+
+Of course it was not that easy.  Breadboards can have unreliable loose connections and soldering incorrectly as you turn the protoboard over and over is easily done.    
+
+A multimeter is essential.  
+
+Basic tests are; is the battery charged, is the esp32 powered with ~3.7v across GND and 3.3v pinout.  Is the sensor powered across VCC and GND. If not, is it the same with just the battery and when the USB is connected.  
+
+More than likely you are looking for an intended connection which is not sound or a short between two places that should not be connected.  This can be harder in the finished product compared to the breadboard prototype (size, visibility).  ChatGPT is pretty good and giving you a set of diagnostic tests if you describe in detail what you are doing and seeing.   A more high tech way of finding problems is to poke a wire through one side of the protoboard then turning it over to see where the wire is to confirm all the soldering is where you expected. 
+
+### Home Assistant integration issues
+
+#### esphome compile errors
+
+If you edit the esphome yaml file and it does not compile then you just have to use ChatPGT, redit forums etc.  YAML is indentation fussy so check that first.
+
+If the esphome compiles and uploads and the sensors appear in home assistant but dont show the values you expect then you probably have a hardware problem. 
 
 ## Installation
 
