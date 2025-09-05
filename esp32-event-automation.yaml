@@ -1,0 +1,67 @@
+alias: "esp32 event "
+description: An esp32 has sent a boot or deep sleep event to ha
+triggers:
+  - trigger: event
+    event_type: esphome.esp32-boot
+    id: boot
+  - trigger: event
+    event_type: esphome.esp32-sleep
+    id: sleep
+conditions: []
+actions:
+  - variables:
+      esp_device: "{{ trigger.event.data.message.split(' ')[0].replace('-', '_') }}"
+      purpose: "{{ ' '.join(trigger.event.data.message.split(' ')[1:]) }}"
+      action: "{{ trigger.id }}"
+      wake_at: >
+        {% set ts = trigger.event.data.wake_at | default(0) | int %} {{ " " if
+        ts == 0 else "wake at " ~ (ts | timestamp_custom("%H:%M:%S")) }}
+  - action: notify.send_message
+    metadata: {}
+    data:
+      message: >-
+        {{ now().strftime('%Y-%m-%dT%H:%M:%S') }} {{ purpose}} ({{ esp_device
+        }}) {{ action }} {{ wake_at }}
+    target:
+      entity_id: notify.<your log file >
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - boot
+        sequence:
+          - action: input_boolean.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.{{ esp_device }}_online
+      - conditions:
+          - condition: trigger
+            id:
+              - sleep
+        sequence:
+          - action: input_boolean.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: input_boolean.{{ esp_device }}_online
+    default:
+      - action: notify.mobile_app_<your phone>
+        metadata: {}
+        data:
+          message: esp32 event automation error
+  - if:
+      - condition: template
+        value_template: >-
+          {{ (trigger.event.data.notify | default(true) | string | lower) !=
+          'false' }}
+      - condition: sun
+        before: sunset
+        after: sunrise
+    then:
+      - action: notify.mobile_app_<your phone>
+        metadata: {}
+        data:
+          message: "{{ purpose}} ({{ esp_device }}) {{ action }} {{ wake_at }}"
+mode: single
+

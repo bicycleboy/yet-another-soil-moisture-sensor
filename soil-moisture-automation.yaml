@@ -1,0 +1,54 @@
+alias: Soil Moisture
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - input_boolean.esp32_8_online
+    to: "on"
+    id: esp32-8
+  - trigger: state
+    entity_id:
+      - input_boolean.esp32_10_online
+    to: "on"
+    id: esp32-10
+conditions: []
+actions:
+  - variables:
+      target_hour: 17
+      target_minute: 0
+      now_ts: "{{ as_timestamp(now()) }}"
+      today_target_ts: >
+        {{ as_timestamp(now().replace(hour=target_hour, minute=target_minute,
+        second=0)) }}
+      target_ts: |
+        {% if now_ts >= today_target_ts or (today_target_ts - now_ts) < 1800 %}
+          {{ today_target_ts + 86400 }}
+        {% else %}
+          {{ today_target_ts }}
+        {% endif %}
+      sleep_duration_ms: "{{ ((target_ts - now_ts) * 1000) | int }}"
+  - delay:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - esp32-8
+        sequence:
+          - action: esphome.esp32_8_enter_deep_sleep
+            data:
+              duration: "{{ sleep_duration_ms }}"
+      - conditions:
+          - condition: trigger
+            id:
+              - esp32-10
+        sequence:
+          - action: esphome.esp32_10_enter_deep_sleep
+            data:
+              duration: "{{ sleep_duration_ms }}"
+mode: parallel
+max: 2
+
