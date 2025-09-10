@@ -4,7 +4,7 @@
 
 ## Overview
 
-A project to learn something about electronics/esp32/home automation while keeping your plants and/or garden watered.  It probably suits a hobbyist with a good bit of time to spare, or a high school project, and particularly someone who already has [Home Assistant](https://www.home-assistant.io/) and has heard about, and is curious about esp32's. It may not be the ideal "first" esp32 project but with the onboard led you have all the kit you need to search for and follow a beginners blink test esphome tutorial.  
+A project to learn something about electronics/esp32/home automation while keeping your plants and/or garden watered.  It probably suits a hobbyist with a good bit of time to spare, or a high school project, and particularly someone who already has [Home Assistant](https://www.home-assistant.io/) and has heard about, and is curious about esp32's. It may not be the ideal "first" esp32 project but with the onboard led you have all the kit you need to search for and follow a beginners blink test esphome tutorial. I have tried to include things I learnt playing with this and other esp32 projects.  The use of a battery, battery monitoring and sleeping the sensor are all applicable to other projects. 
 
 The finished product and the home assistant dashboard:
 
@@ -13,7 +13,8 @@ The finished product and the home assistant dashboard:
 ## Features
 
 - It actually works, it will tell you if your soil is dry!
-- Battery powered with battery monitoring and infrequent charging
+- Battery powered for locating in the garden, with battery percent monitoring (not just voltage)
+- Monthly or better charging cycles due to using deep sleep and powering off the sensor during sleep
 - [Home Assistant](https://www.home-assistant.io/) integration
 
 ## Hardware
@@ -38,13 +39,15 @@ The finished product and the home assistant dashboard:
 
 In 2025 this project might cost you AU$60 or more if you don't already have some bits.  While the heart, the esp32, might only cost you AU$9 and the sensor AU$3, the rest adds up and a waterproof polycarbonate enclosure can be AU$30 making a jam jar look attractive.  Many of the above can be bought cheaply in packs for multiple projects.  I have included links to one supplier I use for my convenience documenting the project (in case I forget what I did and why :-) .  There are many cheap and expensive commerical soil sensors out there but I did not find one that integrates with home assistant.  
 
-You can use many of the various esp32 boards, I chose the esp32-c6 only because it has both an onboard antenna and an interface for connecting an external UFL antenna ( and a low power cpu). If you want to put the sensor in the garden where the WiFi might be weak then an external antenna will help.  This board can also handle 4.2v from the LiPo battery without the need to step the voltage down to 3.3v which some require. If you have or buy a different board, the pinouts will likely be different to the diagram below. Avoid a board/chip that is bleeding edge, check [here](https://esphome.io/components/esp32) for a list of types supported in home assistant. 
+You can use many of the various esp32 boards, I chose the esp32-c6 only because it has both an onboard antenna and an interface for connecting an external UFL antenna (and a low power cpu). If you want to put the sensor in the garden where the WiFi might be weak then an external antenna will help.  This board can also handle 4.2v from the LiPo battery without the need to step the voltage down to 3.3v which some require. If you have or buy a different board, the pinouts will likely be different to the diagram below. Avoid a board/chip that is very new, check [here](https://esphome.io/components/esp32) for a list of types supported in home assistant. 
 
 You can replace the sensor with any sensor that can interface with the [ADC](https://en.wikipedia.org/wiki/Analog-to-digital_converter) [GPIO](https://en.wikipedia.org/wiki/General-purpose_input/output)'s on the esp32.  Note that you need to understand that esp32 GPIOs operate at 3.3v which this soil moisture sensor is fine with, other sensors might require 5v or 12v. Other sensors/suppliers might use different connectors so check what you need to attach to the board. Also check that your sensor is [supported](https://devices.esphome.io/) by esphome or at least discussed in forums. 
 
 I started with a [voltage divider](https://en.wikipedia.org/wiki/Voltage_divider) to measure battery voltage.  While cheap this is basically rubbish due to the [discharge curve](https://www.grepow.com/blog/basis-of-lipo-battery-specifications.html) of LiPo batteries. The Max17408 provides a battery discharge percentage.  Some esp32/microcontoller boards have this built in. There are alternatives on the market.
 
-You don't want to have to charge a battery all the time so choose the largest that will fit in your intended enclosure. On enclosures, the sensors have electronics at one end that need protection.  I have not protected the other end and it seems fine so far.  Whether you are using a polycarbonate enclosure of a jam jar you need to drill out a slot for the sensor to slide through, stopping at the indents where the electronics start.  I just taped mine up for waterproofing waiting for the day that I have some spare silicon sealant.  
+You don't want to have to charge a battery all the time so choose the largest that will fit in your intended enclosure (and the Max17408 only supports single cell). 
+
+On enclosures, the sensors have electronics at one end that need protection.  I have not protected the other end and it seems fine so far.  Whether you are using a polycarbonate enclosure or a jam jar you need to drill out a slot for the sensor to slide through, stopping at the indents where the electronics start.  I just taped mine up for waterproofing waiting for the day that I have some spare silicon sealant.  
 
 ESP32's can be placed into a deep sleep mode which draws very little current.  The [mosfet](https://en.wikipedia.org/wiki/MOSFET) allows the esp32 to also turn the sensor off saving battery. Because the soil moisture sensor uses very little current, it is ok to use a mosfet as a switch. (A relay is an alternative for higher current sensors and use cases.) Esp32's GPIOs [float](https://en.wikipedia.org/wiki/Floating_ground) when in deep sleep so the mosfet allows the esp32 to cut the power to the sensor. 
 
@@ -83,7 +86,13 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
- 
+
+esp32:
+  variant: ESP32C6
+  board: seeed_xiao_esp32c6
+  framework:
+    type: esp-idf
+
 light:
   - platform: status_led
     pin: 
@@ -127,12 +136,12 @@ During prototyping it might look something like the below as you are prototyping
 
 <img src="images/prototyping.jpg" alt="Prototype picture" width="700"/> 
 
-Note that you will have to carefully solder the battery leads to the esp32 (underside) and then you can just plug the battery and the esp32 into the Max17048. Be careful when soldering the battery terminals, tin the wires first and don't take too long!  If you are unconfident soldering practice with resistors or something first. (There is a wiring error in this picture so use the schematic.) You need a way of attaching the sensor wires to the broadboard, I used a spare JST connector.  If you have bare wires you can just plug them into the board. When you move to the protoboard I find it easier to use a JST connect rather than solder the sensor (any sensor) to the protoboard because then the sensor is easily replaced (e.g. for testing or due to damage). 
+Note that you will have to carefully solder the battery leads to the esp32 (underside) and then you can just plug the battery and the esp32 into the Max17048. Be careful when soldering the battery terminals, tin the wires first and don't take too long!  If you are unconfident soldering, practice with resistors or something first. (There is a wiring error in this picture so use the schematic.) You need a way of attaching the sensor wires to the broadboard, I used a spare JST connector.  If you have bare wires you can just plug them into the board. When you move from the breadboard to the protoboard I find it easier to use a JST connect rather than solder the sensor (any sensor) to the protoboard because then the sensor is more easily replaced (e.g. for testing or due to damage). 
 
 4. Get your device visible in esphome as described under Software - esphome.  You should have a User Led control, a soil moisture sensor and diagnostic battery, voltage and WiFi signal.  
 5. Run a wet finger over the surface of the soil moisture sensor.  Shortly it should show as a percentage in home assistant.  If you are getting 0% or 100% see Troubleshooting.
 6. Test the voltage across VCC and GND on the sensor, it should be ~3.7v.
-7. In home assistant navigate to Developer Tools - Actions. Search for "esp" to find the service with a name like esphome.esp32-c6-enter_deep_sleep.  Set a duration of ten seconds (enter 10,000 miliseconds).  Test the voltage across VCC and GND on the sensor, after a few seconds it should drop to zero or near zero.  If so sucess, everything is working!
+7. In home assistant navigate to Developer Tools - Actions. Search for "esp" to find the service with a name like esphome.esp32_c6_enter_deep_sleep.  Set a duration of ten seconds (enter 10,000 miliseconds).  Test the voltage across VCC and GND on the sensor, after a few seconds it should drop to zero or near zero.  If so sucess, everything is working!
 8. Now repeat the process for real by soldering the components to the protoboard. I recommend soldering a header to the protoboard (see examples in the above picture) so that you can easily remove the esp32 when you are soldering (ie you dont want to overheat the esp32 with clumsy soldering and you might want the esp32 for something else later).  The resistors and mosfet are pretty robust against the heat from soldering.  You can probably fit everything on a very small protoboard but for your first go I recommend laying it out so that you can see what you have done with all the connecting wires on the surface and only adjacent holes connected on the underside.
 9. Before powering on, check and re-check all connections intended and otherwise against the schematic and your working breadboard prototype, a maginifying glasss helps check for "cold joints" and the wrong holes being connected.
 10. Plug in the battery and test as steps 4-6.
@@ -155,9 +164,11 @@ More than likely you are looking for an intended connection which is not sound o
 
 #### esphome compile errors
 
-If you edit the esphome yaml file and it does not compile then you just have to use ChatPGT, redit forums etc.  YAML is indentation fussy so check that first. You are more likely to see an unintelligible error than an error that says, "your indentation is wrong".
+If you edit the esphome yaml file and it does not compile then you just have to use ChatPGT, redit forums etc.  YAML is indentation fussy so check that first. You are more likely to see an unintelligible error than an error that says, "your indentation is wrong". Make sure you can sucessfully compile the blink test above. 
 
-If the esphome compiles and uploads and the sensors appear in home assistant but dont show the values you expect then you probably have a hardware problem. 
+### Sensors not updating
+
+If the esphome compiles and uploads and the sensors appear in home assistant but don't show the values you expect then I suggest 8/10 problems are hardware - it's just wired wrong. The esphome logs as the esp32 starts and runs are useful and you can add ESP_LOGI debug statements to your logic as in the example. The logs should show sensor data changing (wifi, moisture).  Check that the sensor update intervals you have specified are giving home assistant time to update.  I have had some problems fixed by deleting the integration and recreating, some rare event issues were fixed with a home assitant re-start.   
 
 ## Installation
 
@@ -166,7 +177,7 @@ git clone https://github.com/bicycleboy/yet-another-soil-moisture-sensor
 cd yet-another-soil-moisture-sensor
 
 ## To Do
-I am looking at a water proof USB socket so that I don't have to unscrew the enclosure each time.  A button to bring the esp32 out of deep sleep on demand would be good too.
+I am looking to add a water proof USB socket so that I don't have to unscrew the enclosure each time.  A button to bring the esp32 out of deep sleep on demand would be good when testing.  I am yet to add automations to alert for a low battery or adjust automated watering based on the moisture level. 
 
 ## License
 
