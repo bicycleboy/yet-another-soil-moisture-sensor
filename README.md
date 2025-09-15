@@ -126,6 +126,8 @@ As mentioned under *esp32-c6.yaml* above I found hardcoding deep_sleep duration 
 
 The main reason sleep_duration_ms is calculated is so that I could take a reading once a day at about the same time and I might have recharged it during the day.  
 
+An added benefit of setting sleep duration from home assistant is that when you are testing you can suspend or change the deep sleep - for example while you are making frequent over the air (ota) updates. In the testing scenario it is useful to have a boot/sleep notification so you don't confuse yourself with home assistant sleeping the esp32 when you did not expect.
+
 ## Step by Step Instructions
 
 Having purchased the hardware, I suggest the following steps:
