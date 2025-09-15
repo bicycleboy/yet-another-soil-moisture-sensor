@@ -10,7 +10,6 @@ substitutions:
   sda_pin: GPIO22
   scl_pin: GPIO23
   user_led_pin: GPIO15
-  battery_adc_pin: GPIO1
   sensor_update_interval: "15s"
   wifi_sensor_update_interval: "60s"
   battery_sensor_update_interval: "15s"
@@ -21,13 +20,15 @@ esphome:
   friendly_name: ${friendly_name}
   name_add_mac_suffix: False
   on_boot:
-    priority: 600
+    priority: 800
     then:
       - script.execute: flash_led
-      # For c6 enable external antenna
+      - wifi.disable:
       - output.turn_off: wifi_enable     # LOW = enable
       - delay: 100ms
-      - output.turn_off: wifi_ant_config  # LOW = external antenna opposite of docs
+      - switch.turn_on: antenna_ext  
+      - wifi.enable:
+ocs
   
 # for c6, support is incomplete 4/25?
 esp32:
@@ -41,11 +42,7 @@ output:
   - platform: gpio
     pin: GPIO3
     id: wifi_enable
-  - platform: gpio
-    pin: GPIO14
-    id: wifi_ant_config
 
-    
 # Enable logging
 logger:
 
@@ -201,6 +198,12 @@ switch:
     id: sensor_power
     pin: ${sensor_power_pin}
     restore_mode: ALWAYS_OFF
+# Define PIN14 as switch to enable external entenna
+  - platform: gpio
+    pin: GPIO14
+    restore_mode: ALWAYS_ON
+    name: "External Wifi Antenna On/Off"
+    id: antenna_ext
 
 #---- sensor definitions -----
 
