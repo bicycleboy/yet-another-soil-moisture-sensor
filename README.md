@@ -13,9 +13,12 @@ The finished product and the home assistant dashboard:
 ## Features
 
 - It actually works, it will tell you if your soil is dry!
-- Battery powered for locating in the garden, with battery percent monitoring (not just voltage)
-- Monthly or better charging cycles due to using deep sleep and powering off the sensor during sleep
-- [Home Assistant](https://www.home-assistant.io/) integration
+- Battery powered for locating in the garden, with battery percent monitoring (not just voltage, using Max17048)
+- Monthly or maybe quaterly charging cycles due to using deep sleep and powering off the sensor during sleep (via MOSFET)
+- [Home Assistant](https://www.home-assistant.io/) integration 
+  - via esphome
+  - notifications about what is going on via events
+  - dynamic calculation of deep sleep cycles
 
 ## Hardware
 
@@ -47,7 +50,7 @@ I started with a [voltage divider](https://en.wikipedia.org/wiki/Voltage_divider
 
 You don't want to have to charge a battery all the time so choose the largest that will fit in your intended enclosure (and the Max17408 only supports single cell). 
 
-On enclosures, the sensors have electronics at one end that need protection.  I have not protected the other end and it seems fine so far.  Whether you are using a polycarbonate enclosure or a jam jar you need to drill out a slot for the sensor to slide through, stopping at the indents where the electronics start.  I just taped mine up for waterproofing waiting for the day that I have some spare silicon sealant.  
+On enclosures, the sensors have electronics at one end that need protection.  I have not protected the other end and it seems fine so far (months in the garden).  Whether you are using a polycarbonate enclosure or a jam jar you need to drill out a slot for the sensor to slide through, stopping at the indents where the electronics start.  I just taped mine up for waterproofing waiting for the day that I have some spare silicon sealant. You might need some sort of umbrella to shade from direct sun. Alternatively search for waterproofing capacitive soil moisture sensors, but make a cup of tea or coffee first.
 
 ESP32's can be placed into a deep sleep mode which draws very little current.  The [mosfet](https://en.wikipedia.org/wiki/MOSFET) allows the esp32 to also turn the sensor off saving battery. Because the soil moisture sensor uses very little current, it is ok to use a mosfet as a switch. (A relay is an alternative for higher current sensors and use cases.) Esp32's GPIOs [float](https://en.wikipedia.org/wiki/Floating_ground) when in deep sleep so the mosfet allows the esp32 to cut the power to the sensor. 
 
