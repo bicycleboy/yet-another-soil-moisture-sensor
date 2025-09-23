@@ -188,8 +188,11 @@ deep_sleep:
   wakeup_pin: ${wake_pin}
   wakeup_pin_mode: INVERT_WAKEUP
 ```
-Again to avoid having to unscrew the cover when recharging I added a waterproof (I hope) usb c socket. I am yet to add automations to alert for a low battery or adjust automated watering based on the moisture level. 
+Again to avoid having to unscrew the cover when recharging I added a waterproof (I hope) usb c socket. 
+
 <img src="images/v2.jpg" alt="Finished product picture" width="300"/>
+
+I am yet to add automations to alert for a low battery or adjust automated watering based on the moisture level. 
 
 ## License
 
