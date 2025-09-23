@@ -181,8 +181,15 @@ git clone https://github.com/bicycleboy/yet-another-soil-moisture-sensor
 
 cd yet-another-soil-moisture-sensor
 
-## To Do
-I am looking to add a water proof USB socket so that I don't have to unscrew the enclosure each time.  A button to bring the esp32 out of deep sleep on demand would be good when testing.  I am yet to add automations to alert for a low battery or adjust automated watering based on the moisture level. 
+## V2 update and To Do
+After posting I could not resist adding a [tilt switch](https://core-electronics.com.au/tilt-ball-switch.html) to bring the esp32 out of deep sleep. I chose a tilt switch because it was small and saved another potential water entry point. A waterproof mometary switch is another option. One of the advantages of a battery powered sensor is you can move it around, it is useful to be able to get readings as you do so without taking the cover off and messing with your deep sleep automations.  It is wired betwen GPIO2 and neutral, with a 10k pull up resistor between GPIO2 and 3.3v. And a couple of extra lines in the deep_sleep: statement. 
+```
+deep_sleep:
+  wakeup_pin: ${wake_pin}
+  wakeup_pin_mode: INVERT_WAKEUP
+```
+Again to avoid having to unscrew the cover when recharging I added a waterproof (I hope) usb c socket. I am yet to add automations to alert for a low battery or adjust automated watering based on the moisture level. 
+<img src="images/v2.jpg" alt="Finished product picture" width="300"/>
 
 ## License
 
